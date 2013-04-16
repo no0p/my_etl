@@ -4,7 +4,7 @@ require 'yaml'
 require 'csv'
 require 'debugger'
 
-conf = YAML::load(File.open(File.dirname(__FILE__) + "/database.yml"))
+conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
 column_file = "#{File.dirname(__FILE__)}/columns.csv"
 
 query = "select table_name, column_name, column_type, table_schema from information_schema.columns"
@@ -21,7 +21,30 @@ File.open(column_file).each_line do |row|
   end unless (table == 'table_name' && column == 'column_name' && type = 'column_type')
 end
 
-debugger
-puts "yo"
+@schemas.each do |schema, tables|
+  tables.each do |table, columns|
+    table_definition = "CREATE FOREIGN TABLE #{table} ("
+    columns.each do |c|
+      col, type = c.to_a.flatten
+      pg_type = case type
+        when /char/ then 'text'
+        when /bigint/ then 'bigint'
+        when /int/ then 'integer'
+        when /float|double|decimal/ then 'numeric'
+        when /enum/ then 'text'
+        when /blob/ then 'bytea'
+        when /text/ then 'text'
+        else 
+          nil
+      end
+      table_definition += "#{col} #{pg_type}, " unless pg_type.nil?
+    end
+    table_definition += ") "
+    table_definition += "SERVER #{conf['foreign_server']} "
+    table_definition += "OPTIONS (table '#{schema}.#{table}');"   
+    
+    puts table_definition
+  end
+end
 
 
