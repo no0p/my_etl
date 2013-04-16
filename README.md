@@ -22,7 +22,14 @@ destination_schema: foreign_migration
   ./discover > foreign_data_tables_ddl.sql
 ```
 
-This will dump the information schema for the columns into columns.csv in the local directory.
+This will dump the information schema for the columns into **columns.csv** in the local directory.
 
-Next it will read the csv file and write postgres foreign data table definitions to stdout.
+Also it will dump executable sql for the foreign tables into **foreign_data_tables_ddl.sql**.
 
+Finally you can add the tables as expected with:
+
+```
+psql -d mydb < foreign_data_tables_ddl.sql
+```
+
+Be sure to check the mysql foreign data wrapper documentation for installing the extension.
