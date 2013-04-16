@@ -9,14 +9,12 @@ column_file = "#{File.dirname(__FILE__)}/columns.csv"
 
 query = "select table_name, column_name, column_type, table_schema from information_schema.columns"
 command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
-puts command
 `#{command}`
 
 @schemas = {}
 File.open(column_file).each_line do |row|
   table, column, type, schema = row.split("\t").map {|i| i.strip}
   if !['mysql','information_schema', 'performance_schema'].include? schema
-    puts schema + '-' + table + " - " + column
     @schemas[schema] ||= {}
     @schemas[schema][table] ||= []
     @schemas[schema][table].push({column => type})
@@ -25,7 +23,9 @@ end
 
 @schemas.each do |schema, tables|
   tables.each do |table, columns|
-    table_definition = "CREATE FOREIGN TABLE #{table} ("
+    destination_schema = ''
+    destination_schema = conf['destination_schema'] + '.' unless (conf['destination_schema'].empty? || conf['destination_schema'].nil?)
+    table_definition = "CREATE FOREIGN TABLE #{destination_schema}#{table} ("
     columns.each do |c|
       col, type = c.to_a.flatten
       pg_type = case type

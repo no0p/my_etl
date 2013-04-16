@@ -11,7 +11,7 @@ Setup config.yml file with appropriate connection information such as the mysql 
 ## Usage
 
 ```
-  ./discover
+  ./discover > foreign_data_tables_ddl.sql
 ```
 
 This will dump the information schema for the columns into columns.csv in the local directory.

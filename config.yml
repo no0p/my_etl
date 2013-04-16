@@ -2,3 +2,4 @@ host: localhost
 username: 
 password: 
 foreign_server: mysql_svr
+destination_schema: foreign_migration
