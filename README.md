@@ -4,9 +4,17 @@ This is a small ruby project that connects to a mysql server and writes sql for 
 
 ## Installation
 
-Ensure standard mysql command line client is installed.
+A.  Ensure standard mysql command line client is installed.
 
-Setup config.yml file with appropriate connection information such as the mysql host, username, and password.  Also the name of the foreign data wrapper server for this server.
+B.  Setup config.yml file with appropriate connection information such as the mysql host, username, and password.  Also the name of the foreign data wrapper server for this server.
+
+```
+host: localhost
+username: 
+password: 
+foreign_server: mysql_svr
+destination_schema: foreign_migration
+```
 
 ## Usage
 
