@@ -2,13 +2,15 @@
 
 require 'yaml'
 require 'csv'
-require 'debugger'
+#require 'debugger'
 
 conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
 column_file = "#{File.dirname(__FILE__)}/columns.csv"
 
 query = "select table_name, column_name, column_type, table_schema from information_schema.columns"
-`echo '#{query}' | mysql -h #{conf['host']} --batch --raw --default-character-set=utf8  > #{column_file}`
+command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
+puts command
+`#{command}`
 
 @schemas = {}
 File.open(column_file).each_line do |row|
@@ -18,7 +20,7 @@ File.open(column_file).each_line do |row|
     @schemas[schema] ||= {}
     @schemas[schema][table] ||= []
     @schemas[schema][table].push({column => type})
-  end unless (table == 'table_name' && column == 'column_name' && type = 'column_type')
+  end unless (table == 'table_name' && column == 'column_name' && type == 'column_type')
 end
 
 @schemas.each do |schema, tables|
