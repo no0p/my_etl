@@ -1,0 +1,5 @@
+host: localhost
+username: 
+password: 
+database: information_schema 
+foreign_server: mysql_svr

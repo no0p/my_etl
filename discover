@@ -1,0 +1,27 @@
+#!/usr/bin/ruby
+
+require 'yaml'
+require 'csv'
+require 'debugger'
+
+conf = YAML::load(File.open(File.dirname(__FILE__) + "/database.yml"))
+column_file = "#{File.dirname(__FILE__)}/columns.csv"
+
+query = "select table_name, column_name, column_type, table_schema from information_schema.columns"
+`echo '#{query}' | mysql -h #{conf['host']} --batch --raw --default-character-set=utf8  > #{column_file}`
+
+@schemas = {}
+File.open(column_file).each_line do |row|
+  table, column, type, schema = row.split("\t").map {|i| i.strip}
+  if !['mysql','information_schema', 'performance_schema'].include? schema
+    puts schema + '-' + table + " - " + column
+    @schemas[schema] ||= {}
+    @schemas[schema][table] ||= []
+    @schemas[schema][table].push({column => type})
+  end unless (table == 'table_name' && column == 'column_name' && type = 'column_type')
+end
+
+debugger
+puts "yo"
+
+
