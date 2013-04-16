@@ -39,7 +39,8 @@ end
         else 
           nil
       end
-      table_definition += "#{col} #{pg_type}, " unless pg_type.nil?
+      table_definition += "#{col} #{pg_type}" unless pg_type.nil?
+      table_definition += ", " unless c == columns.last
     end
     table_definition += ") "
     table_definition += "SERVER #{conf['foreign_server']} "
