@@ -40,7 +40,7 @@ end
         else 
           puts "ERROR: unknown type #{type}"
       end
-      table_definition += "#{col} #{pg_type}" unless pg_type.nil?
+      table_definition += "\"#{col}\" #{pg_type}" unless pg_type.nil?
       table_definition += ", " unless c == columns.last
     end
     table_definition += ") "
