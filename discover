@@ -1,4 +1,6 @@
 #!/usr/bin/ruby
+#TODO: port indexes
+#TODO: count columns in table and columns matched and compare
 
 require 'yaml'
 require 'csv'
@@ -36,6 +38,7 @@ end
         when /enum/ then 'text'
         when /blob|binary/ then 'bytea'
         when /text/ then 'text'
+        when 'date' then 'date'
         when /time/ then 'timestamp'
         else 
           puts "ERROR: unknown type #{type}"
