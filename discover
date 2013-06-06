@@ -6,6 +6,12 @@ require 'yaml'
 require 'csv'
 #require 'debugger'
 
+def announce_errors(errors_array)
+  return if errors_array.empty?
+  puts "=== ERRORS ==="
+  errors_array.each { |em| puts em }
+end
+
 conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
 column_file = "#{File.dirname(__FILE__)}/columns.csv"
 
@@ -24,10 +30,12 @@ File.open(column_file).each_line do |row|
 end
 
 @schemas.each do |schema, tables|
+  error_messages = []
   tables.each do |table, columns|
     destination_schema = ''
     destination_schema = conf['destination_schema'] + '.' unless (conf['destination_schema'].empty? || conf['destination_schema'].nil?)
     table_definition = "CREATE FOREIGN TABLE #{destination_schema}#{table} ("
+    missed_columns = []
     columns.each do |c|
       col, type = c.to_a.flatten
       pg_type = case type
@@ -40,7 +48,8 @@ end
         when /text/ then 'text'
         when 'date' then 'date'
         when /time/ then 'timestamp'
-        else 
+        else
+          missed_columns << col
           puts "ERROR: unknown type #{type}"
       end
       table_definition += "\"#{col}\" #{pg_type}" unless pg_type.nil?
@@ -50,8 +59,12 @@ end
     table_definition += "SERVER #{conf['foreign_server']} "
     table_definition += "OPTIONS (table '#{schema}.#{table}');"   
     
-    puts table_definition
+    if missed_columns.empty?
+      puts table_definition
+    else
+      error_messages << "#{table} was not transferred because columns are missing: #{missed_columns.join(", ")}"
   end
+  announce_errors(error_messages)
 end
 
 
