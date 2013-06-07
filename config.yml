@@ -1,5 +1,5 @@
 host: localhost
-username: 
-password: 
+username: web
+password: web01
 foreign_server: mysql_svr
 destination_schema: foreign_migration

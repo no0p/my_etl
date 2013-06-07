@@ -1,10 +1,14 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 #TODO: port indexes
-#TODO: count columns in table and columns matched and compare
 
 require 'yaml'
 require 'csv'
 #require 'debugger'
+require_relative 'indexes/indexes'
+
+include Indexes::Indexes
+
+
 
 def announce_errors(errors_array)
   return if errors_array.empty?
@@ -14,6 +18,10 @@ end
 
 conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
 column_file = "#{File.dirname(__FILE__)}/columns.csv"
+
+port_indexes(conf, "theclymb_20130601")
+
+exit 0
 
 query = "select table_name, column_name, column_type, table_schema from information_schema.columns"
 command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
@@ -46,7 +54,7 @@ end
         when /enum/ then 'text'
         when /blob|binary/ then 'bytea'
         when /text/ then 'text'
-        when 'date' then 'date'
+        #when 'date' then 'date'
         when /time/ then 'timestamp'
         else
           missed_columns << col
@@ -65,6 +73,7 @@ end
       error_messages << "#{table} was not transferred because columns are missing: #{missed_columns.join(", ")}"
   end
   announce_errors(error_messages)
+end
 end
 
 
