@@ -4,11 +4,7 @@
 require 'yaml'
 require 'csv'
 #require 'debugger'
-require_relative 'indexes/indexes'
-
-include Indexes::Indexes
-
-
+require_relative 'table_definition/indexes'
 
 def announce_errors(errors_array)
   return if errors_array.empty?
@@ -19,7 +15,8 @@ end
 conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
 column_file = "#{File.dirname(__FILE__)}/columns.csv"
 
-port_indexes(conf, "theclymb_20130601")
+indexes = TableDefinition::Indexes.create_index_statements(conf, "theclymb_20130601")
+indexes.each {|idx| puts idx }
 
 exit 0
 
