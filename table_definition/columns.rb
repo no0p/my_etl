@@ -64,7 +64,7 @@ module TableDefinition
               mirror_table_definition += ", " unless c == columns.last
             end
             table_definition += ") "
-            mirror_table_definition += ") "
+            mirror_table_definition += ");"
             table_definition += "SERVER #{conf['foreign_server']} "
             table_definition += "OPTIONS (table '#{schema}.#{table}');"
 
