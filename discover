@@ -1,54 +1,49 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
+require 'optparse'
 require 'yaml'
 require 'csv'
 #require 'debugger'
+require_relative 'table_definition/indexes'
+require_relative 'table_definition/columns'
+
+options = {}
+OptionParser.new do |opts|
+    opts.banner = "Usage: ./discover.rb [options]"
+
+    opts.on("-d", "--database [STRING]", "mysql database name to translate") do |d|
+      options[:database] = d
+    end
+
+    opts.on("-s", "--destination-schema [STRING]", "schema of pg database to port the mysql tables") do |s|
+      options[:schema] = s
+    end
+end.parse!
+
+unless options[:database]
+  puts "must use -d or --database option"
+  exit 1
+end
+
+def announce_errors(errors_array)
+  return if errors_array.empty?
+  puts "=== ERRORS ==="
+  errors_array.each { |em| puts em }
+end
 
 conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
-column_file = "#{File.dirname(__FILE__)}/columns.csv"
 
-query = "select table_name, column_name, column_type, table_schema from information_schema.columns"
-command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
-`#{command}`
+conf.merge!(:destination_schema => option[:schema]) if options[:destination_schema]
 
-@schemas = {}
-File.open(column_file).each_line do |row|
-  table, column, type, schema = row.split("\t").map {|i| i.strip}
-  if !['mysql','information_schema', 'performance_schema'].include? schema
-    @schemas[schema] ||= {}
-    @schemas[schema][table] ||= []
-    @schemas[schema][table].push({column => type})
-  end unless (table == 'table_name' && column == 'column_name' && type == 'column_type')
+tables, errors = TableDefinition::Columns.create_table_statements(conf, options[:database])
+
+indexes = TableDefinition::Indexes.create_index_statements(conf, options[:database])
+
+if errors.any?
+  announce_errors(errors)
+  exit 1
+else
+  puts tables
+  indexes.each {|idx| puts idx }
+  exit 0
 end
-
-@schemas.each do |schema, tables|
-  tables.each do |table, columns|
-    destination_schema = ''
-    destination_schema = conf['destination_schema'] + '.' unless (conf['destination_schema'].empty? || conf['destination_schema'].nil?)
-    table_definition = "CREATE FOREIGN TABLE #{destination_schema}#{table} ("
-    columns.each do |c|
-      col, type = c.to_a.flatten
-      pg_type = case type
-        when /char/ then 'text'
-        when /bigint/ then 'bigint'
-        when /int/ then 'integer'
-        when /float|double|decimal/ then 'numeric'
-        when /enum/ then 'text'
-        when /blob|binary/ then 'bytea'
-        when /text/ then 'text'
-        when /time/ then 'timestamp'
-        else 
-          puts "ERROR: unknown type #{type}"
-      end
-      table_definition += "\"#{col}\" #{pg_type}" unless pg_type.nil?
-      table_definition += ", " unless c == columns.last
-    end
-    table_definition += ") "
-    table_definition += "SERVER #{conf['foreign_server']} "
-    table_definition += "OPTIONS (table '#{schema}.#{table}');"   
-    
-    puts table_definition
-  end
-end
-
-
