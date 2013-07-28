@@ -61,7 +61,7 @@ module TableDefinition
                           missed_columns << col
                         end
               # Some easy dry cleanup here once care.          
-              cols += "\"#{col}\" #{pg_type}" unless pg_type.nil?
+              cols += "\"#{col}\"" unless pg_type.nil?
               cols += ", " unless c == columns.last          
                         
               table_definition += "\"#{col}\" #{pg_type}" unless pg_type.nil?
