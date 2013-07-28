@@ -26,7 +26,7 @@ OptionParser.new do |opts|
     opts.on("-r", "--replace_tables", "drops tables before creating tables") do |s|
       options[:replace] = s
     end
-    
+
 end.parse!
 
 unless options[:database]
@@ -46,7 +46,7 @@ conf.merge!(:destination_schema => option[:schema]) if options[:destination_sche
 conf.merge!(:replace => options[:replace]) if options[:replace]
 conf.merge!(:mirror_schema => options[:mirror_schema]) if options[:mirror_schema]
 
-tables, errors = TableDefinition::Columns.create_table_statements(conf, options[:database])
+tables, errors, copy_selects = TableDefinition::Columns.create_table_statements(conf, options[:database])
 
 indexes = TableDefinition::Indexes.create_index_statements(conf, options[:database])
 
@@ -56,5 +56,6 @@ if errors.any?
 else
   puts tables
   indexes.each {|idx| puts idx }
+  puts copy_selects
   exit 0
 end

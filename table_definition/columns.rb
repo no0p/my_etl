@@ -12,6 +12,7 @@ module TableDefinition
 
       `#{command}`
       all_tables = []
+      copy_selects = []
 
       @schemas = {}
       File.open(column_file).each_line do |row|
@@ -41,6 +42,8 @@ module TableDefinition
             
             mirror_table_definition += "CREATE TABLE #{mirror_schema}#{table} ("
             table_definition += "CREATE FOREIGN TABLE #{destination_schema}#{table} ("
+            
+            cols = ""
             missed_columns = []
             columns.each do |c|
               col, type = c.to_a.flatten
@@ -57,6 +60,10 @@ module TableDefinition
                         else
                           missed_columns << col
                         end
+              # Some easy dry cleanup here once care.          
+              cols += "\"#{col}\" #{pg_type}" unless pg_type.nil?
+              cols += ", " unless c == columns.last          
+                        
               table_definition += "\"#{col}\" #{pg_type}" unless pg_type.nil?
               table_definition += ", " unless c == columns.last
               
@@ -67,18 +74,20 @@ module TableDefinition
             mirror_table_definition += ");"
             table_definition += "SERVER #{conf['foreign_server']} "
             table_definition += "OPTIONS (table '#{schema}.#{table}');"
+            copy_select = "INSERT INTO #{mirror_schema}#{table} (#{cols}) SELECT #{cols} FROM #{destination_schema}#{table};"
 
             if missed_columns.empty?
               all_tables << table_definition
     
               all_tables << mirror_table_definition unless conf[:mirror_schema].nil?
+              copy_selects << copy_select unless conf[:mirror_schema].nil?
             else
               error_messages << "#{table} was not transferred because columns are missing: #{missed_columns.join(", ")}"
             end
         end
         end
 
-        return all_tables, error_messages
+        return all_tables, error_messages, copy_selects
     end
   end
 end
