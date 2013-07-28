@@ -26,13 +26,13 @@ module TableDefinition
         nullable     = row[12]
 
         if index_name == "PRIMARY"
-          indexes << "ALTER TABLE source_new.#{table_name} ADD PRIMARY KEY (#{column_name});"
+          indexes << "ALTER TABLE #{conf['destination_schema']}.#{table_name} ADD PRIMARY KEY (#{column_name});"
           index_string = ""
         elsif seq_in_index == 1
           index_string << ");" unless index_string.empty?
           indexes << index_string unless index_string.empty?
           index_string = ""
-          index_string << "CREATE INDEX #{index_name} ON source_new.#{table_name} (#{column_name}"
+          index_string << "CREATE INDEX #{index_name} ON #{conf['destination_schema']}.#{table_name} (#{column_name}"
         else
           index_string << ", #{column_name}"
         end
