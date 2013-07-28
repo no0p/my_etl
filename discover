@@ -3,7 +3,7 @@
 require 'optparse'
 require 'yaml'
 require 'csv'
-#require 'debugger'
+# require 'debugger'
 require_relative 'table_definition/indexes'
 require_relative 'table_definition/columns'
 
@@ -18,6 +18,15 @@ OptionParser.new do |opts|
     opts.on("-s", "--destination-schema [STRING]", "schema of pg database to port the mysql tables") do |s|
       options[:schema] = s
     end
+    
+    opts.on("-m", "--mirror-schema [STRING]", "schema of pg database to mirror foreign tables locally") do |s|
+      options[:mirror_schema] = s
+    end
+    
+    opts.on("-r", "--replace_tables", "drops tables before creating tables") do |s|
+      options[:replace] = s
+    end
+    
 end.parse!
 
 unless options[:database]
@@ -34,6 +43,8 @@ end
 conf = YAML::load(File.open(File.dirname(__FILE__) + "/config.yml"))
 
 conf.merge!(:destination_schema => option[:schema]) if options[:destination_schema]
+conf.merge!(:replace => options[:replace]) if options[:replace]
+conf.merge!(:mirror_schema => options[:mirror_schema]) if options[:mirror_schema]
 
 tables, errors = TableDefinition::Columns.create_table_statements(conf, options[:database])
 
