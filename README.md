@@ -4,7 +4,9 @@ This is a small ruby project that connects to a mysql server and writes sql for 
 
 A database can be copied from mysql to psql in the following manner:
 
+```
 discover -d mysqldbname -s temp_schema -m public  | psql -U username -d pgdbname
+```
 
 ## Installation
 
