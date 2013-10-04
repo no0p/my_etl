@@ -8,8 +8,6 @@ require 'debugger'
 require_relative 'lib/indexes'
 require_relative 'lib/columns'
 require_relative 'lib/command'
-require_relative 'lib/util'
-
 
 tables, errors, copy_selects = TableDefinition::Columns.create_table_statements(CONF)
 indexes = TableDefinition::Indexes.create_index_statements(CONF)
