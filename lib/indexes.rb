@@ -4,10 +4,8 @@ module TableDefinition
   class Indexes
 
     def self.fetch_index_definition(conf)
-
-      db_name = conf['database_name']
       query = <<-SQL
-        select * from information_schema.statistics WHERE TABLE_SCHEMA="#{db_name}"
+        select * from information_schema.statistics WHERE TABLE_SCHEMA="#{conf['database_name']}"
       SQL
       command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8"
       return command
@@ -18,8 +16,7 @@ module TableDefinition
       command = fetch_index_definition(conf)
       indexes = []
       index_string = ""     
-
-      
+ 
       CSV.parse(`#{command}`, :col_sep => "\t", :headers => true) do |row|
 
         table_schema = row[1]

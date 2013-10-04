@@ -2,12 +2,11 @@ module TableDefinition
   class Columns
 
     def self.create_table_statements(conf)
-      db_name = conf['database_name']
       column_file = "#{File.dirname(__FILE__)}/columns.csv"
       query = <<-SQL
         SELECT table_name, column_name, column_type, table_schema
         FROM information_schema.columns 
-        WHERE table_schema = "#{db_name}"
+        WHERE table_schema = "#{conf['database_name']}"
       SQL
       command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
       
@@ -86,9 +85,10 @@ module TableDefinition
               error_messages << "#{table} was not transferred because columns are missing: #{missed_columns.join(", ")}"
             end
         end
-        end
+      end
 
-        return all_tables, error_messages, copy_selects
+      return all_tables, error_messages, copy_selects
+      
     end
   end
 end

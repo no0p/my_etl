@@ -8,22 +8,19 @@ require 'debugger'
 require_relative 'lib/indexes'
 require_relative 'lib/columns'
 require_relative 'lib/command'
+require_relative 'lib/util'
 
-def announce_errors(errors_array)
-  return if errors_array.empty?
-  puts "=== ERRORS ==="
-  errors_array.each { |em| puts em }
-end
 
 tables, errors, copy_selects = TableDefinition::Columns.create_table_statements(CONF)
 indexes = TableDefinition::Indexes.create_index_statements(CONF)
 
-if errors.any?
-  announce_errors(errors)
-  exit 1
-else
-  puts tables
-  indexes.each {|idx| puts idx }
-  puts copy_selects
-  exit 0
-end
+#
+# Report
+#
+errors.each {|e| $stderr.puts e}
+exit 1 if errors.any?
+
+# Print SQL to stdout
+puts tables
+indexes.each {|idx| puts idx }
+puts copy_selects
