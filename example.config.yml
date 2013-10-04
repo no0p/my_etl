@@ -1,5 +1,4 @@
 host: localhost
 username: root 
-password: mysql
 foreign_server: mysql_svr
 destination_schema: foreign_migration

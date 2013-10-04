@@ -1,7 +1,8 @@
 module TableDefinition
   class Columns
 
-    def self.create_table_statements(conf, db_name)
+    def self.create_table_statements(conf)
+      db_name = conf['database_name']
       column_file = "#{File.dirname(__FILE__)}/columns.csv"
       query = <<-SQL
         SELECT table_name, column_name, column_type, table_schema
@@ -9,7 +10,7 @@ module TableDefinition
         WHERE table_schema = "#{db_name}"
       SQL
       command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
-
+      
       `#{command}`
       all_tables = []
       copy_selects = []

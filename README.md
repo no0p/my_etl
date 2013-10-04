@@ -39,3 +39,7 @@ psql -d mydb < foreign_data_tables_ddl.sql
 ```
 
 Be sure to check the mysql foreign data wrapper documentation for installing the extension.
+
+## A Note on Security
+
+Install a my.cnf file in the users home directory to avoid entering password.
