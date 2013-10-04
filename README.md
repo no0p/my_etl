@@ -1,31 +1,19 @@
 ## Overview
 
-This is a small ruby project that connects to a mysql server and writes sql for creating foreign data tables in a postgresql format.  It is designed to work with the mysql foreign data wrapper at https://github.com/bdigital/mysql_fdw
+MyETL is a ruby script that connects to a mysql server and writes sql for creating foreign data tables in a postgresql format.
 
-A database can be copied from mysql to psql in the following manner:
-
-```
-discover -d mysqldbname -s temp_schema -m public  | psql -U username -d pgdbname
-```
+Optionally it can generate the SQL to create a mirror database in postgresql effectively make a postgres replica of the data in your mysql system.
 
 ## Installation
 
-A.  Ensure standard mysql command line client is installed.
-
-B.  Setup config.yml file with appropriate connection information such as the mysql host, username, and password.  Also the name of the foreign data wrapper server for this server.
-
-```
-host: localhost
-username: 
-password: 
-foreign_server: mysql_svr
-destination_schema: foreign_migration
-```
+-- git clone https://github.com/no0p/my_etl.git
+-- Requires the mysql command line utility
+-- Requires the mysql_fdw from https://github.com/no0p/mysql_fdw to be installed in the target postgresql database
 
 ## Usage
 
 ```
-  ./discover > foreign_data_tables_ddl.sql
+my_etl -d mysqldbname -s temp_schema -m public  | psql -U pgusername -d pgdbname
 ```
 
 This will dump the information schema for the columns into **columns.csv** in the local directory.
@@ -42,4 +30,6 @@ Be sure to check the mysql foreign data wrapper documentation for installing the
 
 ## A Note on Security
 
-Install a my.cnf file in the users home directory to avoid entering password.
+Leaving password blank to the command line utility will result in the user being prompted for a password.
+
+If automating process, I'd recommend installing a my.cnf file in the users home directory to avoid entering password.
