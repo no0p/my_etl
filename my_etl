@@ -3,7 +3,7 @@
 require 'optparse'
 require 'yaml'
 require 'csv'
-require 'debugger'
+# require 'debugger'
 
 require_relative 'lib/indexes'
 require_relative 'lib/columns'
