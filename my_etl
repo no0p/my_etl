@@ -9,8 +9,8 @@ require_relative 'lib/indexes'
 require_relative 'lib/columns'
 require_relative 'lib/command'
 
-tables, errors, copy_selects = TableDefinition::Columns.create_table_statements(CONF)
-indexes = TableDefinition::Indexes.create_index_statements(CONF)
+tables, errors, copy_selects = Columns.create_table_statements(CONF)
+indexes = Indexes.create_index_statements(CONF)
 
 #
 # Report
