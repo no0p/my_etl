@@ -6,7 +6,7 @@ class Indexes
     query = <<-SQL
       select * from information_schema.statistics WHERE TABLE_SCHEMA="#{conf['database_name']}"
     SQL
-    command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8"
+    command = "echo '#{query}' | mysql -h #{conf['host']} -P #{conf['port']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8"
     return command
   end
 

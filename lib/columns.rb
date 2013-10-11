@@ -9,7 +9,7 @@ class Columns
       FROM information_schema.columns 
       WHERE table_schema = "#{conf['database_name']}"
     SQL
-    command = "echo '#{query}' | mysql -h #{conf['host']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
+    command = "echo '#{query}' | mysql -h #{conf['host']} -P #{conf['port']} -u #{conf['username']} -p#{conf['password']} --batch --raw --default-character-set=utf8  > #{column_file}"
 
     `#{command}`
     

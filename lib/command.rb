@@ -50,7 +50,8 @@ CONF = {'destination_schema' => 'public',
         'replace' => false,
         'mirror_schema' => nil,
         'host' => 'localhost',
-        'foreign_server' => 'mysql_svr'}
+        'foreign_server' => 'mysql_svr',
+	'port' => 3306}
 
 CONF.merge!(YAML::load(File.open(File.dirname(__FILE__) + "/../" + options[:config_file]))) if options[:config_file]
 
