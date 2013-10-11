@@ -1,3 +1,7 @@
+#
+# Define and parse options
+#
+
 options = {}
 PARSER = OptionParser.new do |opts|
   opts.banner = "Usage: ./discover.rb [options]"
@@ -41,17 +45,17 @@ end
 
 PARSER.parse!
 
-if options[:database].nil? && options[:config_file].nil?
-  puts "must use -d or --database option, or specify a configuration file"
-  exit 1
-end
+
+#
+# Build Conf hash
+#
 
 CONF = {'destination_schema' => 'public',
         'replace' => false,
         'mirror_schema' => nil,
         'host' => 'localhost',
         'foreign_server' => 'mysql_svr',
-	'port' => 3306}
+        'port' => 3306}
 
 CONF.merge!(YAML::load(File.open(File.dirname(__FILE__) + "/../" + options[:config_file]))) if options[:config_file]
 
@@ -63,4 +67,19 @@ CONF.merge!('username' => options[:username]) if options[:username]
 CONF.merge!('password' => options[:password]) if options[:password]
 CONF.merge!('host' => options[:host]) if options[:host]
 CONF.merge!('port' => options[:port]) if options[:port]
+
+#
+# Check some Error conditions
+#
+
+if options[:database].nil? && options[:config_file].nil?
+  puts "must use -d or --database option, or specify a configuration file.  see --help for options."
+  exit 1
+end
+
+
+if CONF['destination_schema'] == CONF['mirror_schema']
+  puts "destination_schema and mirror_schema cannot be the same schema"
+  exit 1
+end 
 

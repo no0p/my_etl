@@ -20,5 +20,8 @@ exit 1 if errors.any?
 
 # Print SQL to stdout
 puts tables
-indexes.each {|idx| puts idx }
-puts copy_selects
+
+if !CONF['mirror_schema'].nil?
+  indexes.each {|idx| puts idx }
+  puts copy_selects
+end
