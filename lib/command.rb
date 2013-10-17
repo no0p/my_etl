@@ -64,7 +64,7 @@ CONF = {'destination_schema' => 'public',
 
 CONF.merge!(YAML::load(File.open(File.dirname(__FILE__) + "/../" + options[:config_file]))) if options[:config_file]
 
-CONF.merge!('destination_schema' => option[:schema]) if options[:schema]
+CONF.merge!('destination_schema' => options[:schema]) if options[:schema]
 CONF.merge!('replace' => options[:replace]) if options[:replace]
 CONF.merge!('mirror_schema' => options[:mirror_schema]) if options[:mirror_schema]
 CONF.merge!('database_name' => options[:database]) if options[:database]
