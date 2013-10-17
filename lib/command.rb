@@ -41,6 +41,11 @@ PARSER = OptionParser.new do |opts|
   opts.on("-r", "--replace_tables", "drops tables before creating tables") do |s|
     options[:replace] = s
   end
+  
+  opts.on("-f", "--foreign_server [STRING]", "the name of the foreign server") do |f|
+    options[:foreign_server] = f
+  end
+  
 end
 
 PARSER.parse!
@@ -67,6 +72,7 @@ CONF.merge!('username' => options[:username]) if options[:username]
 CONF.merge!('password' => options[:password]) if options[:password]
 CONF.merge!('host' => options[:host]) if options[:host]
 CONF.merge!('port' => options[:port]) if options[:port]
+CONF.merge!('foreign_server' => options[:foreign_server]) if options[:foreign_server]
 
 #
 # Check some Error conditions
