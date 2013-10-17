@@ -43,7 +43,7 @@ if options[:database].nil? && options[:config_file].nil?
 end
 
 q = <<SQL
-  SELECT relname, attname, typname
+  SELECT relname, attname, typname, schemaname
   FROM (
     SELECT relname, oid 
       FROM pg_class where relname in (
@@ -51,32 +51,36 @@ q = <<SQL
       ) 
     ) AS tablez INNER JOIN pg_attribute on pg_attribute.attrelid = tablez.oid
       INNER JOIN pg_type on pg_type.oid = pg_attribute.atttypid
+      INNER JOIN pg_tables ON pg_tables.tablename = tablez.relname
   WHERE typname NOT IN ('xid', 'cid', 'tid', 'oid')
   ORDER BY relname;
 SQL
 
 table_info = `echo "#{q}" | psql -d #{options[:database]} -h #{options[:host]} -U #{options[:username]} -p #{options[:port]}`
 
-rels = {}
+schemas = {} #
 lines = table_info.split("\n")
 lines.shift
 lines.each do |line|
-  fields = line.split("|")
-  if fields.length == 3
-    rels[fields[0].strip] ||= {}
-    rels[fields[0].strip][fields[1].strip] = fields[2].strip
+  table, attribute, type, schema = line.split("|").map {|i| i.strip}
+  if !table.nil? && !attribute.nil? && !type.nil? && !schema.nil?
+    schemas[schema] ||= {}
+    schemas[schema][table] ||= {}
+    schemas[schema][table][attribute] = type
   end
 end
 
+ # iterate over schemas -> tables -> attributes -> types, build sql
 ddl = ""
-rels.each do |r|
-  ddl += "create foreign table #{options[:schema]}.#{r.first} ("
- 
-  r.last.each do |i|
-    ddl += " \"#{i.first}\" #{i.last},"
+schemas.each do |s, tables|
+  tables.each do |t, attributes|
+    ddl += "create foreign table #{options[:schema]}.#{t} ("
+   
+    attributes.each { |attri, type| ddl += " \"#{attri}\" #{type}," }
+    ddl.chop!
+    
+    ddl += ") SERVER #{options[:foreign_server]} OPTIONS (schema_name '#{s}');"
   end
-  ddl.chop!
-  ddl += ") SERVER #{options[:foreign_server]};"
 end
 
 puts ddl
