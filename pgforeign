@@ -71,7 +71,7 @@ rels.each do |r|
   ddl += "create foreign table #{options[:schema]}.#{r.first} ("
  
   r.last.each do |i|
-    ddl += " \"#{i.first}\" i.last,"
+    ddl += " \"#{i.first}\" #{i.last},"
   end
   ddl.chop!
   ddl += ") SERVER #{options[:foreign_server]};"
