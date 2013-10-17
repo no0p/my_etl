@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require 'optparse'
 
-options = {:port => 5432, :host => 'localhost', :schema => 'foreign', :foreign_server => 'myserver'}
+options = {:port => 5432, :host => 'localhost', :schema => 'foreign_schema', :foreign_server => 'myserver'}
 OptionParser.new do |opts|
   opts.banner = "Usage: ./pgforeign.rb [options]"
 
@@ -58,9 +58,11 @@ SQL
 table_info = `echo "#{q}" | psql -d #{options[:database]} -h #{options[:host]} -U #{options[:username]} -p #{options[:port]}`
 
 rels = {}
-table_info.split("\n").each do |line|
+lines = table_info.split("\n")
+lines.shift
+lines.each do |line|
   fields = line.split("|")
-  if fields.length == 3 && fields[0] != 'relname'
+  if fields.length == 3
     rels[fields[0].strip] ||= {}
     rels[fields[0].strip][fields[1].strip] = fields[2].strip
   end
