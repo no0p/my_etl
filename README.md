@@ -16,14 +16,10 @@ Optionally it can generate the SQL to create a mirror database in postgresql eff
 my_etl -d mysqldbname -s temp_schema -m public  | psql -U pgusername -d pgdbname
 ```
 
-This will dump the information schema for the columns into **columns.csv** in the local directory.
-
-Also it will dump executable sql for the foreign tables into **foreign_data_tables_ddl.sql**.
-
-Finally you can add the tables as expected with:
+New bonus postgres table extraction!:
 
 ```
-psql -d mydb < foreign_data_tables_ddl.sql
+pgforeign -d pgdbname -s temp_schema 
 ```
 
 Be sure to check the mysql foreign data wrapper documentation for installing the extension.

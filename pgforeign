@@ -1,0 +1,80 @@
+#!/usr/bin/ruby
+require 'optparse'
+
+options = {:port => 5432, :host => 'localhost', :schema => 'foreign', :foreign_server => 'myserver'}
+OptionParser.new do |opts|
+  opts.banner = "Usage: ./pgforeign.rb [options]"
+
+  opts.on("-d", "--database [STRING]", "database name") do |d|
+    options[:database] = d
+  end
+  
+  opts.on("-f", "--foreign-server [STRING]", "foreign server name in ddl statements") do |d|
+    options[:foreign_server] = d
+  end
+  
+  opts.on("-u", "--username [STRING]", "user name to connect with") do |u|
+    options[:username] = u
+  end
+  
+  opts.on("-h", "--host [STRING]", "host to connect to") do |u|
+    options[:host] = u
+  end
+  
+  opts.on("-P", "--port [STRING]", "port to connect to") do |p|
+    options[:port] = p
+  end
+  
+  opts.on("-p", "--password [STRING]", "password to connect with, this may not work") do |p|
+    options[:password] = p
+  end
+
+  opts.on("-s", "--destination-schema [STRING]", "schema of pg database to port the mysql tables") do |s|
+    options[:schema] = s
+  end
+end.parse!
+
+#
+# Check some Error conditions
+#
+if options[:database].nil? && options[:config_file].nil?
+  puts "must use -d or --database option, or specify a configuration file.  see --help for options."
+  exit 1
+end
+
+q = <<SQL
+  SELECT relname, attname, typname
+  FROM (
+    SELECT relname, oid 
+      FROM pg_class where relname in (
+        SELECT tablename FROM pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+      ) 
+    ) AS tablez INNER JOIN pg_attribute on pg_attribute.attrelid = tablez.oid
+      INNER JOIN pg_type on pg_type.oid = pg_attribute.atttypid
+  WHERE typname NOT IN ('xid', 'cid', 'tid', 'oid')
+  ORDER BY relname;
+SQL
+
+table_info = `echo "#{q}" | psql -d #{options[:database]} -h #{options[:host]} -U #{options[:username]} -p #{options[:port]}`
+
+rels = {}
+table_info.split("\n").each do |line|
+  fields = line.split("|")
+  if fields.length == 3 && fields[0] != 'relname'
+    rels[fields[0].strip] ||= {}
+    rels[fields[0].strip][fields[1].strip] = fields[2].strip
+  end
+end
+
+ddl = ""
+rels.each do |r|
+  ddl += "create foreign table #{options[:schema]}.#{r.first} ("
+ 
+  r.last.each do |i|
+    ddl += " \"#{i.first}\" i.last,"
+  end
+  ddl.chop!
+  ddl += ") SERVER #{options[:foreign_server]};"
+end
+
+puts ddl
