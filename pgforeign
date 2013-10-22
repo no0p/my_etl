@@ -79,13 +79,14 @@ end
 ddl = ""
 schemas.each do |s, tables|
   tables.each do |t, attributes|
-    t = '"' + s + '.' + t + '"' if options[:fake_schema]
-    ddl += "create foreign table #{options[:schema]}.#{t} ("
+    tl = t
+    tl = '"' + s + '.' + t + '"' if (options[:fake_schema] && s != 'public')
+    ddl += "create foreign table #{options[:schema]}.#{tl} ("
    
     attributes.each { |attri, type| ddl += " \"#{attri}\" #{type}," }
     ddl.chop!
     
-    ddl += ") SERVER #{options[:foreign_server]} OPTIONS (schema_name '#{s}');"
+    ddl += ") SERVER #{options[:foreign_server]} OPTIONS (table_name '#{t}', schema_name '#{s}');"
   end
 end
 
